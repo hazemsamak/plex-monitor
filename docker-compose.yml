@@ -1,0 +1,31 @@
+lversion: "3.7"
+services:
+  prometheus:
+    image: prom/prometheus:v2.37.6
+    volumes:
+            - ./prometheus/data:/prometheus
+            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+  grafana:
+    image: grafana/grafana:9.3.6-ubuntu
+    volumes:
+       - ./grafana/data:/var/lib/grafana
+       - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+       - ./grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yaml
+    ports:
+      - 3000:3000
+    links:
+      - prometheus
+
+  # Add below section
+  node-exporter:
+    image: prom/node-exporter:v1.5.0
+    container_name: monitoring_node_exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    expose:
+      - 9100
